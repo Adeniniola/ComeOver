@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COMEOVER - Tracking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .step {
+      text-align: center;
+      flex: 1;
+    }
+    .step .circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+    .step.active .circle {
+      background: #ff6600; /* Orange for current step */
+    }
+    .step.completed .circle {
+      background: #28a745; /* Green for completed */
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-danger" href="index.html">COMEOVER</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="restaurants.html">Restaurants</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menu</a></li>
+        <li class="nav-item"><a class="nav-link" href="cart.html">Cart <span class="badge bg-danger" id="cart-badge">0</span></a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Tracking Content -->
+<div class="container my-5">
+  <h2 class="mb-4">Order Tracking</h2>
+
+  <!-- Order Summary -->
+  <div class="mb-4">
+    <h4>Your Order:</h4>
+    <ul class="list-group" id="order-summary"></ul>
+  </div>
+
+  <!-- Delivery Progress -->
+  <div class="d-flex justify-content-between mb-5" id="tracking-steps">
+    <div class="step" id="step1">
+      <div class="circle">1</div>
+      <p>Preparing</p>
+    </div>
+    <div class="step" id="step2">
+      <div class="circle">2</div>
+      <p>On the way</p>
+    </div>
+    <div class="step" id="step3">
+      <div class="circle">3</div>
+      <p>Delivered</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load last order
+  const lastOrder = JSON.parse(localStorage.getItem("lastOrder")) || [];
+  const orderSummary = document.getElementById("order-summary");
+  
+  if (lastOrder.length > 0) {
+    lastOrder.forEach(item => {
+      let li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `${item.name} <span class="badge bg-danger rounded-pill">${item.qty}</span>`;
+      orderSummary.appendChild(li);
+    });
+  } else {
+    orderSummary.innerHTML = "<li class='list-group-item'>No recent order found.</li>";
+  }
+
+  // Update cart badge
+  document.getElementById("cart-badge").innerText = localStorage.getItem("cartCount") || 0;
+
+  // Tracking Progress Simulation
+  let currentStep = 1;
+  function updateSteps() {
+    for (let i = 1; i <= 3; i++) {
+      let step = document.getElementById("step" + i);
+      if (i < currentStep) {
+        step.classList.add("completed");
+        step.classList.remove("active");
+      } else if (i === currentStep) {
+        step.classList.add("active");
+        step.classList.remove("completed");
+      } else {
+        step.classList.remove("active", "completed");
+      }
+    }
+  }
+  updateSteps();
+
+  // Auto move through steps every 5 seconds
+  let interval = setInterval(() => {
+    if (currentStep < 3) {
+      currentStep++;
+      updateSteps();
+    } else {
+      // Final step: Delivered ✅
+      updateSteps();
+      document.getElementById("step3").classList.add("completed");
+      document.getElementById("step3").classList.remove("active");
+      clearInterval(interval);
+    }
+  }, 5000);
+</script>
+</body>
+</html>
